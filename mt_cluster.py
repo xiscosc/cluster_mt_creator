@@ -21,7 +21,7 @@ def get_file(filename):
 def get_cluster(num_ps, ps_alongside, num_gpus, all_gpus_in_node):
     init_port = 2220
     nodes = get_nodes()
-    if num_ps >= len(nodes):
+    if (ps_alongside and num_ps > len(nodes)) or (not ps_alongside and num_ps >= len(nodes)):
         sys.exit("Incorrect PS number")
     ports = [':' + str(x) for x in range(init_port, init_port + num_gpus)]
 
