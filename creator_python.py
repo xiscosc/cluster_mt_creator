@@ -93,13 +93,16 @@ def put_in_file(num_ps, ps_alongside, num_gpus, all_gpus_in_node, cluster, scrip
             print(" & ".join(lines), file=filename)
 
 
-def __main__():
-    filename = sys.argv[1]
-    script = sys.argv[2]
-    num_ps = int(sys.argv[3])
-    num_gpus = int(sys.argv[4])
-    all_gpus_in_node = bool(int(sys.argv[5]))
-    ps_alongside = bool(int(sys.argv[6]))
+if __name__ == "__main__":
+    try:
+        filename = sys.argv[1]
+        script = sys.argv[2]
+        num_ps = int(sys.argv[3])
+        num_gpus = int(sys.argv[4])
+        all_gpus_in_node = bool(int(sys.argv[5]))
+        ps_alongside = bool(int(sys.argv[6]))
+    except IndexError:
+        sys.exit("Incorrect args")
 
     file = get_file(filename)
     cluster = get_cluster(num_ps, ps_alongside, num_gpus, all_gpus_in_node)
