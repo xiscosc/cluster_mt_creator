@@ -60,9 +60,9 @@ def put_in_file(num_ps, ps_alongside, num_gpus, all_gpus_in_node, cluster, scrip
         for ps in range(num_ps):
             line = get_script_line("ps", cluster, script, ps, "")
             print(line, file=filename)
+        task_w_index = 0
         for worker in cluster['worker_nodes']:
             lines = []
-            task_w_index = 0
             if not all_gpus_in_node:  # 4W per node
                 for x in range(num_gpus):
                     lines.append(get_script_line("worker", cluster, script, task_w_index, x))
