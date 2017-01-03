@@ -50,7 +50,7 @@ def get_cluster(num_ps, ps_alongside, num_gpus, all_gpus_in_node):
 
 def get_script_line(name, cluster, script, index, visible_devices):
     return 'CUDA_VISIBLE_DEVICES="' + str(visible_devices) + '" python ' + script + ' --ps_hosts=' + cluster[
-        'ps_string'] + '--worker_hosts=' + \
+        'ps_string'] + ' --worker_hosts=' + \
            cluster['worker_string'] + ' --job_name=' + name + ' --task_index=' + str(index)
 
 
