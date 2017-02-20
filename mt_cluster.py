@@ -5,7 +5,7 @@ Creates a GREASY TASKS FILE
 2: TF script file
 3: number of ps
 4: number of gpus to be used
-5: 1/0 (All gpus in a worker/One gpu per worker)
+5: 1/0 Mixed-async or pure async (1 worker per node with intra-node parallelism or one worker for each gpu)
 6: 1/0 (PSs alongside with workers/ PSs alone)
 
 """
@@ -18,7 +18,7 @@ def get_file(filename):
     return open(filename, "w")
 
 
-def get_cluster(num_ps, ps_alongside, num_gpus, all_gpus_in_node):
+def get_cluster(num_ps, ps_alongside, num_gpus, mixed_async):
     init_port = 2220
     nodes = get_nodes()
     if (ps_alongside and num_ps > len(nodes)) or (not ps_alongside and num_ps >= len(nodes)):
@@ -33,7 +33,7 @@ def get_cluster(num_ps, ps_alongside, num_gpus, all_gpus_in_node):
         index = -1 * (len(nodes) - num_ps)
         worker_nodes = nodes[index:]
 
-    if not all_gpus_in_node:
+    if not mixed_async:
         worker_nodes_4 = []
         for worker in worker_nodes:
             for port in ports:
@@ -54,7 +54,7 @@ def get_script_line(name, cluster, script, index, visible_devices):
            cluster['worker_string'] + ' --job_name=' + name + ' --task_index=' + str(index)
 
 
-def put_in_file(num_ps, ps_alongside, num_gpus, all_gpus_in_node, cluster, script, filename):
+def put_in_file(num_ps, ps_alongside, num_gpus, mixed_async, cluster, script, filename):
     visible_devices = ",".join([str(n) for n in range(num_gpus)])
     if not ps_alongside:
         for ps in range(num_ps):
@@ -63,7 +63,7 @@ def put_in_file(num_ps, ps_alongside, num_gpus, all_gpus_in_node, cluster, scrip
         task_w_index = 0
         for worker in cluster['worker_nodes']:
             lines = []
-            if not all_gpus_in_node:  # 4W per node
+            if not mixed_async:  # 4W per node
                 for x in range(num_gpus):
                     lines.append(get_script_line("worker", cluster, script, task_w_index, x))
                     task_w_index += 1
@@ -83,7 +83,7 @@ def put_in_file(num_ps, ps_alongside, num_gpus, all_gpus_in_node, cluster, scrip
                     lines.append(get_script_line("ps", cluster, script, task_ps_index, ""))
                     task_ps_index += 1
             worker_index += 1
-            if not all_gpus_in_node:  # 4W per node
+            if not mixed_async:  # 4W per node
                 for x in range(num_gpus):
                     lines.append(get_script_line("worker", cluster, script, task_w_index, x))
                     task_w_index += 1
@@ -99,11 +99,11 @@ if __name__ == "__main__":
         script = sys.argv[2]
         num_ps = int(sys.argv[3])
         num_gpus = int(sys.argv[4])
-        all_gpus_in_node = bool(int(sys.argv[5]))
+        mixed_async = bool(int(sys.argv[5]))
         ps_alongside = bool(int(sys.argv[6]))
     except IndexError:
         sys.exit("Incorrect args")
 
     file = get_file(filename)
-    cluster = get_cluster(num_ps, ps_alongside, num_gpus, all_gpus_in_node)
-    put_in_file(num_ps, ps_alongside, num_gpus, all_gpus_in_node, cluster, script, file)
+    cluster = get_cluster(num_ps, ps_alongside, num_gpus, mixed_async)
+    put_in_file(num_ps, ps_alongside, num_gpus, mixed_async, cluster, script, file)

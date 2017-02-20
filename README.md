@@ -2,7 +2,7 @@
 
 Example of use:
 
-    python mt_cluster.py file_tasks.txt script.py num_ps num_gpus gpus_inside ps_alongside
+    python mt_cluster.py file_tasks.txt script.py num_ps num_gpus mixed_async ps_alongside
 
 Real example:
 
